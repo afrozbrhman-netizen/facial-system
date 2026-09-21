@@ -4,9 +4,9 @@ import secrets
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
-    JWT_SECRET = os.environ.get("JWT_SECRET", secrets.token_hex(32))
-    JWT_EXPIRATION_HOURS = int(os.environ.get("JWT_EXPIRATION_HOURS", 12))
+    SECRET_KEY = os.environ.get("SECRET_KEY", "enterprise_attendance_studio_secret_2026_x7k9")
+    JWT_SECRET = os.environ.get("JWT_SECRET", "enterprise_attendance_studio_jwt_token_2026_m4p2")
+    JWT_EXPIRATION_HOURS = int(os.environ.get("JWT_EXPIRATION_HOURS", 24))
     
     # Database
     DB_PATH = os.path.join(BASE_DIR, "attendance.db")
