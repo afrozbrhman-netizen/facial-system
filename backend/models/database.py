@@ -191,21 +191,20 @@ class Database:
                         VALUES ('Default Standard Policy', '09:00 AM', '09:15 AM', '05:00 PM', 75.0, 1, ?)
                     ''', (now,))
 
-                # Seed initial administrative and demo accounts
-                cur.execute("SELECT COUNT(*) FROM users")
-                if cur.fetchone()[0] == 0:
-                    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    users_to_seed = [
-                        ("admin", "admin@attendance.studio", "Admin@123", "admin", None),
-                        ("teacher", "teacher@attendance.studio", "Teacher@123", "teacher_hr", None),
-                        ("EMP001", "student@attendance.studio", "Student@123", "student_employee", 1)
-                    ]
-                    for u, email, pwd, role, eid in users_to_seed:
-                        pwd_h = hash_password(pwd)
-                        cur.execute('''
-                            INSERT OR IGNORE INTO users (username, email, password_hash, role, employee_id, status, created_at)
-                            VALUES (?, ?, ?, ?, ?, 'active', ?)
-                        ''', (u, email, pwd_h, role, eid, now))
+                # Seed initial administrative and faculty accounts
+                now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                users_to_seed = [
+                    ("admin", "admin@attendance.studio", "Admin@123", "admin", None),
+                    ("teacher", "teacher@attendance.studio", "Teacher@123", "teacher_hr", None),
+                    ("misba", "misba@attendance.studio", "Misba@123", "teacher_hr", None),
+                    ("EMP001", "student@attendance.studio", "Student@123", "student_employee", 1)
+                ]
+                for u, email, pwd, role, eid in users_to_seed:
+                    pwd_h = hash_password(pwd)
+                    cur.execute('''
+                        INSERT OR IGNORE INTO users (username, email, password_hash, role, employee_id, status, created_at)
+                        VALUES (?, ?, ?, ?, ?, 'active', ?)
+                    ''', (u, email, pwd_h, role, eid, now))
 
                 # Auto-sync existing 'students' table to 'employees' table so existing students appear seamlessly
                 cur.execute("SELECT serial_no, student_id, name, registered_at FROM students")
