@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Studio 2.0 - Enterprise Biometric System</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       LOGIN SCREEN OVERLAY
+       ========================================================================= -->
+  <div id="login-overlay">
+    <div class="login-card">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+        <div class="brand-logo" style="width: 44px; height: 44px;">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 00-16 0"/><line x1="19" y1="11" x2="19" y2="17"/><line x1="22" y1="14" x2="16" y2="14"/></svg>
+        </div>
+        <div>
+          <h2 style="font-size: 20px; font-weight: 700; color: #fff;">Attendance Studio</h2>
+          <span style="font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase;">Enterprise Biometrics</span>
+        </div>
+      </div>
+
+      <div id="login-error" style="display: none; padding: 10px 14px; background: var(--danger-light); border: 1px solid var(--danger); border-radius: 8px; color: #f87171; font-size: 13px; margin-bottom: 18px;"></div>
+
+      <form id="login-form">
+        <div class="input-group">
+          <label for="login-username">Username or Email</label>
+          <input type="text" id="login-username" class="form-control" placeholder="e.g. admin" required autocomplete="username">
+        </div>
+        <div class="input-group" style="margin-bottom: 24px;">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          Sign In to Terminal
+        </button>
+      </form>
+
+      <div class="quick-roles" style="flex-wrap: wrap;">
+        <div style="width: 100%; font-size: 11px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; font-weight: 700;">Demo Quick-Fill:</div>
+        <button type="button" class="role-chip" data-role="admin">Admin</button>
+        <button type="button" class="role-chip" data-role="teacher">Teacher</button>
+        <button type="button" class="role-chip" data-role="student">Student (8)</button>
+        <div style="width: 100%; font-size: 11.5px; color: var(--text-dim); margin-top: 10px; text-align: center;">
+          Each student logs in with their own <strong>Student ID</strong> &amp; individual password (e.g. <code>8</code> / <code>8@123</code>, <code>1GC23CS044</code> / <code>1GC23CS044@123</code>).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MAIN APPLICATION LAYOUT
+       ========================================================================= -->
+  <div id="app-container">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 00-16 0"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>Attendance Studio</h1>
+          <span>Enterprise 2.0</span>
+        </div>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-label">Main Menu</div>
+        <a class="nav-item active" data-tab="dashboard" data-permission="admin,teacher_hr">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a class="nav-item" data-tab="scanner" data-permission="admin,teacher_hr">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Camera Terminal
+        </a>
+        <a class="nav-item" data-tab="employees" data-permission="admin,teacher_hr">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Staff & Students
+        </a>
+        <a class="nav-item" data-tab="records" data-permission="admin,teacher_hr,student_employee">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Attendance Logs
+        </a>
+        <a class="nav-item" data-tab="reports" data-permission="admin,teacher_hr">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Reports & Exports
+        </a>
+
+        <div class="nav-label" data-permission="admin">Administration</div>
+        <a class="nav-item" data-tab="settings" data-permission="admin">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Shift Rules & Setup
+        </a>
+        <a class="nav-item" data-tab="audit" data-permission="admin">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Security Audit Trail
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-mini">
+          <div class="user-avatar" id="sidebar-user-avatar">AD</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">Administrator</div>
+            <div class="user-role-badge" id="sidebar-user-role">Admin</div>
+          </div>
+        </div>
+        <button class="btn-logout" id="btn-logout" title="Sign Out">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <div class="header-title">
+          <h2 id="header-title-text">Executive Attendance Overview</h2>
+          <p>Real-Time Deep ResNet 128-d Biometrics &amp; Anti-Spoofing</p>
+        </div>
+        <div class="header-actions">
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            Biometric AI Online
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT PANES -->
+      <main class="page-container">
+
+        <!-- =================================================================
+             TAB: DASHBOARD
+             ================================================================= -->
+        <div class="tab-pane active" id="tab-dashboard">
+          <div class="grid-4">
+            <div class="card stat-card">
+              <div class="stat-top">
+                <span class="stat-title">Total Staff / Students</span>
+                <div class="stat-icon icon-purple">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="stat-total-emp">0</div>
+              <div class="stat-sub">Active enrolled directory</div>
+            </div>
+
+            <div class="card stat-card">
+              <div class="stat-top">
+                <span class="stat-title">Present Today</span>
+                <div class="stat-icon icon-green">
+                  <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="stat-present-today">0</div>
+              <div class="stat-sub">Attendance Rate: <strong id="stat-att-rate" style="color: #34d399; margin-left: 4px;">0%</strong></div>
+            </div>
+
+            <div class="card stat-card">
+              <div class="stat-top">
+                <span class="stat-title">Late Arrivals Today</span>
+                <div class="stat-icon icon-amber">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="stat-late-today">0</div>
+              <div class="stat-sub">Past policy threshold</div>
+            </div>
+
+            <div class="card stat-card">
+              <div class="stat-top">
+                <span class="stat-title">Low Attendance Alert</span>
+                <div class="stat-icon icon-red">
+                  <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+              </div>
+              <div class="stat-value" id="stat-low-att">0</div>
+              <div class="stat-sub">Enrolled &lt; 75% minimum</div>
+            </div>
+          </div>
+
+          <!-- CHARTS GRID -->
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">7-Day Attendance Trend</h3>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="chart-attendance-trend"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Department Distribution</h3>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="chart-dept-breakdown"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECENT FEED -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Today's Live Attendance Feed</h3>
+              <button class="btn btn-secondary btn-sm" onclick="App.switchTab('records')">View All Records</button>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Shift Status</th>
+                  </tr>
+                </thead>
+                <tbody id="today-preview-tbody">
+                  <tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 20px;">Loading today's activity...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- =================================================================
+             TAB: BIOMETRIC CAMERA SCANNER
+             ================================================================= -->
+        <div class="tab-pane" id="tab-scanner">
+          <div class="scanner-grid">
+            <!-- Left: Viewfinder -->
+            <div>
+              <div class="camera-container">
+                <video id="camera-video" autoplay playsinline muted></video>
+                <canvas id="scanner-canvas"></canvas>
+
+                <!-- Futuristic Reticle HUD -->
+                <div class="reticle-hud">
+                  <div class="reticle-corner rc-tl"></div>
+                  <div class="reticle-corner rc-tr"></div>
+                  <div class="reticle-corner rc-bl"></div>
+                  <div class="reticle-corner rc-br"></div>
+                  <div class="laser-line"></div>
+                </div>
+
+                <div class="scanner-status-strip">
+                  <div class="scan-indicator">
+                    <div class="indicator-dot"></div>
+                    <span id="scanner-status-text">Camera Off</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted);">
+                    Anti-Spoofing: <span style="color: #34d399; font-weight: 600;">EAR + Blur Texture Active</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Camera Controls -->
+              <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button class="btn btn-primary" id="btn-toggle-camera" style="flex: 1;">
+                  Start Camera
+                </button>
+                <button class="btn btn-secondary" id="btn-manual-scan">
+                  Scan Frame
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Config & Verification Feedback -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <!-- Session Context Card -->
+              <div class="card" style="padding: 20px;">
+                <div class="card-header" style="margin-bottom: 12px;">
+                  <h3 class="card-title">Session Parameters</h3>
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                  <label>Terminal Mode</label>
+                  <select id="scanner-mode" class="form-control">
+                    <option value="auto">Auto (Check-In / Check-Out)</option>
+                    <option value="check_in">Check-In Only</option>
+                    <option value="check_out">Check-Out Only</option>
+                  </select>
+                </div>
+                <div class="grid-2" style="margin-bottom: 0; gap: 12px;">
+                  <div class="input-group" style="margin-bottom: 0;">
+                    <label>Subject / Activity</label>
+                    <input type="text" id="scanner-subject" class="form-control" value="General Shift">
+                  </div>
+                  <div class="input-group" style="margin-bottom: 0;">
+                    <label>Category</label>
+                    <select id="scanner-category" class="form-control">
+                      <option value="Classroom Lecture">Classroom Lecture</option>
+                      <option value="Lab Session">Lab Session</option>
+                      <option value="Office Shift">Office Shift</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Real-time Verification Feedback Box -->
+              <div class="feedback-box state-ready" id="scanner-feedback">
+                <div class="feedback-icon" style="background: rgba(255,255,255,0.05); color: var(--accent);">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <h3 style="color: #ffffff; margin-bottom: 4px;">Biometric Terminal Ready</h3>
+                <p style="font-size: 13px; color: var(--text-muted);">Start the camera to begin automated facial recognition and check-in.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =================================================================
+             TAB: EMPLOYEES & STUDENTS DIRECTORY
+             ================================================================= -->
+        <div class="tab-pane" id="tab-employees">
+          <div class="card">
+            <div class="card-header" style="flex-wrap: wrap; gap: 14px;">
+              <h3 class="card-title">Registered Personnel &amp; Students</h3>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="emp-search" class="form-control" placeholder="Search by name, ID or email..." style="width: 250px;">
+                <select id="emp-dept-filter" class="form-control" style="width: 170px;">
+                  <option value="">All Departments</option>
+                </select>
+                <button class="btn btn-primary" onclick="Employees.openAddModal()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Person
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Individual</th>
+                    <th>Code / ID</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Face Biometrics</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="employees-tbody">
+                  <tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 30px;">Loading directory...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- =================================================================
+             TAB: ATTENDANCE RECORDS & HISTORY
+             ================================================================= -->
+        <div class="tab-pane" id="tab-records">
+          <div class="card">
+            <div class="card-header" style="flex-wrap: wrap; gap: 14px;">
+              <h3 class="card-title">Attendance History Logs</h3>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-secondary btn-sm" id="btn-export-excel">Export Excel (.xlsx)</button>
+                <button class="btn btn-secondary btn-sm" id="btn-export-csv">Export CSV</button>
+                <button class="btn btn-secondary btn-sm" id="btn-export-print">Print / PDF</button>
+                <button class="btn btn-primary btn-sm" onclick="Records.openManualModal()" data-permission="admin,teacher_hr">+ Manual Mark</button>
+              </div>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+              <input type="text" id="rec-search" class="form-control" placeholder="Search by name or ID..." style="width: 220px;">
+              <select id="rec-status-filter" class="form-control" style="width: 140px;">
+                <option value="">All Statuses</option>
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+              </select>
+              <input type="date" id="rec-date-from" class="form-control" style="width: 150px;">
+              <input type="date" id="rec-date-to" class="form-control" style="width: 150px;">
+            </div>
+
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Shift Status</th>
+                  </tr>
+                </thead>
+                <tbody id="records-tbody">
+                  <tr><td colspan="9" style="text-align: center; color: var(--text-dim); padding: 30px;">Loading records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 18px;">
+              <span id="rec-page-info" style="font-size: 12.5px; color: var(--text-dim);">Showing 0 records</span>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" id="rec-prev-page" onclick="Records.prevPage()">Previous</button>
+                <button class="btn btn-secondary btn-sm" id="rec-next-page" onclick="Records.nextPage()">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =================================================================
+             TAB: REPORTS & LOW ATTENDANCE
+             ================================================================= -->
+        <div class="tab-pane" id="tab-reports">
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <h3 class="card-title">Compliance &amp; Export Center</h3>
+            </div>
+            <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px;">
+              Generate and export comprehensive reports for administrative audits, monthly reviews, and parent/management notifications.
+            </p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" onclick="Records.downloadExport('excel')">
+                Download Full Log (Excel)
+              </button>
+              <button class="btn btn-secondary" id="btn-export-low-excel">
+                Download Low Attendance Report (&lt; 75%)
+              </button>
+              <button class="btn btn-secondary" id="btn-export-low-csv">
+                Download Low Attendance (CSV)
+              </button>
+            </div>
+          </div>
+
+          <!-- Low Attendance Risk Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <span style="color: var(--warning); margin-right: 6px;">●</span>
+                Individuals Below Minimum Attendance Threshold (&lt; 75%)
+              </h3>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Department</th>
+                    <th>Attended / Total</th>
+                    <th>Percentage</th>
+                    <th>Compliance Status</th>
+                  </tr>
+                </thead>
+                <tbody id="low-att-tbody">
+                  <tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 25px;">Checking attendance compliance...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- =================================================================
+             TAB: SYSTEM SETTINGS & RULES (Admin Only)
+             ================================================================= -->
+        <div class="tab-pane" id="tab-settings">
+          <div class="grid-2">
+            <!-- Attendance Policy Rules -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Shift Timings &amp; Threshold Rules</h3>
+              </div>
+              <form id="settings-rules-form">
+                <div class="input-group">
+                  <label>Work Start Time</label>
+                  <input type="text" id="rule-start-time" class="form-control" value="09:00 AM">
+                </div>
+                <div class="input-group">
+                  <label>Late Arrival Threshold</label>
+                  <input type="text" id="rule-late-time" class="form-control" value="09:15 AM">
+                </div>
+                <div class="input-group">
+                  <label>Work End Time</label>
+                  <input type="text" id="rule-end-time" class="form-control" value="05:00 PM">
+                </div>
+                <div class="input-group">
+                  <label>Minimum Attendance Requirement (%)</label>
+                  <input type="number" id="rule-min-pct" class="form-control" value="75" min="1" max="100">
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Save Policy Rules</button>
+              </form>
+            </div>
+
+            <!-- Departments Manager -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Department Management</h3>
+              </div>
+              <form id="settings-dept-form" style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <input type="text" id="dept-name-input" class="form-control" placeholder="Department Name" required>
+                <input type="text" id="dept-code-input" class="form-control" placeholder="Code (e.g. CS)" style="width: 110px;">
+                <button type="submit" class="btn btn-secondary">Add</button>
+              </form>
+              <div id="settings-depts-list" style="max-height: 240px; overflow-y: auto;"></div>
+            </div>
+          </div>
+
+          <!-- Add User Account Card -->
+          <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+              <h3 class="card-title">Create Faculty / Administrator Account</h3>
+            </div>
+            <form id="settings-user-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: end;">
+              <div class="input-group" style="margin-bottom: 0;">
+                <label>Username</label>
+                <input type="text" id="new-user-username" class="form-control" required>
+              </div>
+              <div class="input-group" style="margin-bottom: 0;">
+                <label>Email</label>
+                <input type="email" id="new-user-email" class="form-control">
+              </div>
+              <div class="input-group" style="margin-bottom: 0;">
+                <label>Password</label>
+                <input type="password" id="new-user-password" class="form-control" required>
+              </div>
+              <div class="input-group" style="margin-bottom: 0;">
+                <label>Role</label>
+                <select id="new-user-role" class="form-control">
+                  <option value="teacher_hr">Faculty / Teacher</option>
+                  <option value="admin">Administrator</option>
+                </select>
+              </div>
+              <div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- =================================================================
+             TAB: SECURITY AUDIT TRAIL (Admin Only)
+             ================================================================= -->
+        <div class="tab-pane" id="tab-audit">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Security &amp; Audit Trail</h3>
+              <button class="btn btn-secondary btn-sm" onclick="Settings.loadAuditLogs()">Refresh Logs</button>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>IP Address</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-logs-tbody">
+                  <tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 25px;">Loading audit logs...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODALS
+       ========================================================================= -->
+
+  <!-- MODAL: ADD EMPLOYEE -->
+  <div class="modal-backdrop" id="modal-add-employee">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Enroll New Student or Staff Member</h3>
+        <button class="modal-close" onclick="Employees.closeAddModal()">&times;</button>
+      </div>
+      <form id="add-employee-form">
+        <div class="modal-body">
+          <div class="input-group">
+            <label>ID / Roll / Employee Code *</label>
+            <input type="text" id="add-emp-code" class="form-control" placeholder="e.g. EMP105 or 1004" required>
+          </div>
+          <div class="input-group">
+            <label>Full Name *</label>
+            <input type="text" id="add-emp-name" class="form-control" placeholder="e.g. Jane Doe" required>
+          </div>
+          <div class="grid-2" style="margin-bottom: 0; gap: 12px;">
+            <div class="input-group">
+              <label>Email Address</label>
+              <input type="email" id="add-emp-email" class="form-control" placeholder="jane@univ.edu">
+            </div>
+            <div class="input-group">
+              <label>Phone Number</label>
+              <input type="tel" id="add-emp-phone" class="form-control" placeholder="+1234567890">
+            </div>
+          </div>
+          <div class="grid-2" style="margin-bottom: 0; gap: 12px;">
+            <div class="input-group">
+              <label>Department</label>
+              <select id="add-emp-dept" class="form-control"></select>
+            </div>
+            <div class="input-group">
+              <label>Designation / Role</label>
+              <input type="text" id="add-emp-designation" class="form-control" value="Student">
+            </div>
+          </div>
+          <div class="input-group" style="margin-top: 10px;">
+            <label>Individual Student Password (Optional)</label>
+            <input type="password" id="add-emp-password" class="form-control" placeholder="Leave blank to auto-generate: [Code]@123">
+            <span style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">Each student/employee receives their own unique password.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="Employees.closeAddModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SET / RESET INDIVIDUAL STUDENT PASSWORD -->
+  <div class="modal-backdrop" id="modal-reset-password">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 id="reset-pwd-modal-title">Set Password for Student</h3>
+        <button class="modal-close" onclick="Employees.closeResetPwdModal()">&times;</button>
+      </div>
+      <form id="reset-password-form">
+        <div class="modal-body">
+          <p id="reset-pwd-subtitle" style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;"></p>
+          <div class="input-group">
+            <label>New Individual Password *</label>
+            <input type="password" id="reset-pwd-input" class="form-control" placeholder="Enter custom password" required minlength="4">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="Employees.closeResetPwdModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ENROLL FACE BIOMETRICS -->
+  <div class="modal-backdrop" id="modal-enroll-face">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="enroll-modal-title">Enroll Facial Biometrics</h3>
+        <button class="modal-close" onclick="Employees.closeFaceModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <div style="position: relative; width: 320px; height: 320px; margin: 0 auto 16px; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid var(--border);">
+          <video id="enroll-webcam-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+        </div>
+
+        <div id="enroll-status-msg" style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
+          Position face straight towards camera and click Capture.
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 16px;">
+          <button type="button" class="btn btn-primary" id="btn-capture-enroll-face">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            Capture &amp; Enroll Face
+          </button>
+        </div>
+
+        <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 8px;">— or upload an existing photo —</div>
+        <input type="file" id="enroll-file-input" accept="image/*" style="font-size: 12px; color: var(--text-muted);">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="Employees.closeFaceModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: MANUAL MARK ATTENDANCE -->
+  <div class="modal-backdrop" id="modal-manual-mark">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Manual Attendance Override</h3>
+        <button class="modal-close" onclick="Records.closeManualModal()">&times;</button>
+      </div>
+      <form id="manual-attendance-form">
+        <div class="modal-body">
+          <div class="input-group">
+            <label>Student / Employee ID *</label>
+            <input type="text" id="manual-student-id" class="form-control" placeholder="e.g. EMP001" required>
+          </div>
+          <div class="grid-2" style="margin-bottom: 0; gap: 12px;">
+            <div class="input-group">
+              <label>Status</label>
+              <select id="manual-status" class="form-control">
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Shift Timing Status</label>
+              <select id="manual-shift-status" class="form-control">
+                <option value="On-Time">On-Time</option>
+                <option value="Late">Late</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-bottom: 0; gap: 12px;">
+            <div class="input-group">
+              <label>Date (DD-MM-YYYY)</label>
+              <input type="text" id="manual-date" class="form-control" placeholder="Leave empty for today">
+            </div>
+            <div class="input-group">
+              <label>Time</label>
+              <input type="text" id="manual-time" class="form-control" placeholder="e.g. 09:05:00 AM">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Subject / Lecture</label>
+            <input type="text" id="manual-subject" class="form-control" value="General">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="Records.closeManualModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATION JAVASCRIPT MODULES -->
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/scanner.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+  <script src="/static/js/employees.js"></script>
+  <script src="/static/js/records.js"></script>
+  <script src="/static/js/settings.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

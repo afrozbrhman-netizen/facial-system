@@ -1,0 +1,145 @@
+/**
+ * Authentication and Role-Based UI Access Controller
+ */
+const Auth = {
+  currentUser: null,
+
+  init() {
+    this.currentUser = API.getUser();
+    this.bindEvents();
+
+    if (this.currentUser && API.getToken()) {
+      this.applyUserState(this.currentUser);
+    } else {
+      this.showLogin();
+    }
+
+    window.addEventListener("auth:expired", () => {
+      this.showLogin("Session expired. Please log in again.");
+    });
+  },
+
+  bindEvents() {
+    // Login form submit
+    const loginForm = document.getElementById("login-form");
+    if (loginForm) {
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const usernameInput = document.getElementById("login-username").value.trim();
+        const passwordInput = document.getElementById("login-password").value;
+        const errorAlert = document.getElementById("login-error");
+        errorAlert.style.display = "none";
+
+        try {
+          const res = await API.request("/api/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ username: usernameInput, password: passwordInput })
+          });
+
+          if (res.success && res.token) {
+            API.setToken(res.token);
+            API.setUser(res.user);
+            this.currentUser = res.user;
+            this.applyUserState(res.user);
+            this.hideLogin();
+            API.showToast(`Welcome back, ${res.user.full_name}!`, "success");
+            // Trigger initial data load
+            window.dispatchEvent(new CustomEvent("app:ready"));
+          } else {
+            errorAlert.textContent = res.message || "Invalid credentials.";
+            errorAlert.style.display = "block";
+          }
+        } catch (err) {
+          errorAlert.textContent = err.message || "Failed to communicate with authentication server.";
+          errorAlert.style.display = "block";
+        }
+      });
+    }
+
+    // Quick demo role buttons
+    document.querySelectorAll(".role-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const role = btn.dataset.role;
+        const uInput = document.getElementById("login-username");
+        const pInput = document.getElementById("login-password");
+        if (role === "admin") {
+          uInput.value = "admin";
+          pInput.value = "Admin@123";
+        } else if (role === "teacher") {
+          uInput.value = "teacher";
+          pInput.value = "Teacher@123";
+        } else if (role === "student") {
+          uInput.value = "8";
+          pInput.value = "8@123";
+        }
+      });
+    });
+
+    // Logout button
+    const logoutBtn = document.getElementById("btn-logout");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        try {
+          await API.request("/api/auth/logout", { method: "POST" });
+        } catch {}
+        API.setToken(null);
+        API.setUser(null);
+        this.currentUser = null;
+        this.showLogin();
+      });
+    }
+  },
+
+  applyUserState(user) {
+    // Update user profile in sidebar
+    const nameEl = document.getElementById("sidebar-user-name");
+    const roleEl = document.getElementById("sidebar-user-role");
+    const avatarEl = document.getElementById("sidebar-user-avatar");
+
+    if (nameEl) nameEl.textContent = user.full_name || user.username;
+    if (roleEl) {
+      const roleTitles = {
+        admin: "Administrator",
+        teacher_hr: "Faculty / HR",
+        student_employee: "Student / Employee"
+      };
+      roleEl.textContent = roleTitles[user.role] || user.role;
+    }
+    if (avatarEl && user.profile_photo_path) {
+      avatarEl.innerHTML = `<img src="/${user.profile_photo_path}" alt="${user.full_name}">`;
+    }
+
+    // Apply role permissions to nav elements
+    const role = user.role;
+    document.querySelectorAll("[data-permission]").forEach(el => {
+      const permitted = el.dataset.permission.split(",");
+      if (permitted.includes(role)) {
+        el.style.display = "";
+      } else {
+        el.style.display = "none";
+      }
+    });
+
+    // Default tab depending on role
+    if (role === "student_employee") {
+      App.switchTab("records");
+    } else {
+      App.switchTab("dashboard");
+    }
+  },
+
+  showLogin(msg = null) {
+    const overlay = document.getElementById("login-overlay");
+    if (overlay) overlay.style.display = "flex";
+    const err = document.getElementById("login-error");
+    if (err && msg) {
+      err.textContent = msg;
+      err.style.display = "block";
+    }
+  },
+
+  hideLogin() {
+    const overlay = document.getElementById("login-overlay");
+    if (overlay) overlay.style.display = "none";
+  }
+};

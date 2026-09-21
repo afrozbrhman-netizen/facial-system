@@ -1,0 +1,9 @@
+Face Recognition Based Attendance Monitoring System
+Full script — local-only storage (no Google Drive sync).
+Features:
+- Robust registration serial handling (no off-by-one)
+- Autofit Excel column widths using openpyxl
+- Caps Lock detection (Windows, macOS (pyobjc), Linux fallbacks)
+- Password dialogs with show/hide toggle and caps-lock warnings
+- Email attendance (sends today's Attendance_xlsx file)
+- Train, Take Images, Take Attendance, delete operations
