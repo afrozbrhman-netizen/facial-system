@@ -32,14 +32,14 @@
 
       <div id="login-error" style="display: none; padding: 10px 14px; background: var(--danger-light); border: 1px solid var(--danger); border-radius: 8px; color: #f87171; font-size: 13px; margin-bottom: 18px;"></div>
 
-      <form id="login-form">
+      <form id="login-form" autocomplete="off">
         <div class="input-group">
           <label for="login-username">Username or Email</label>
-          <input type="text" id="login-username" class="form-control" placeholder="e.g. admin" required autocomplete="username">
+          <input type="text" id="login-username" class="form-control" placeholder="Enter your username or ID" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
         <div class="input-group" style="margin-bottom: 24px;">
           <label for="login-password">Password</label>
-          <input type="password" id="login-password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+          <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required autocomplete="new-password">
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">
           Sign In to Terminal

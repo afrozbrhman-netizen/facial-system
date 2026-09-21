@@ -112,10 +112,19 @@ const Auth = {
   showLogin(msg = null) {
     const overlay = document.getElementById("login-overlay");
     if (overlay) overlay.style.display = "flex";
+    const uInput = document.getElementById("login-username");
+    const pInput = document.getElementById("login-password");
+    if (uInput) uInput.value = "";
+    if (pInput) pInput.value = "";
     const err = document.getElementById("login-error");
-    if (err && msg) {
-      err.textContent = msg;
-      err.style.display = "block";
+    if (err) {
+      if (msg) {
+        err.textContent = msg;
+        err.style.display = "block";
+      } else {
+        err.textContent = "";
+        err.style.display = "none";
+      }
     }
   },
 
