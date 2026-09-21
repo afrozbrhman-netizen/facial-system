@@ -909,9 +909,123 @@ select.form-control option {
   border-color: var(--primary);
   color: #fff;
 }
+/* ==========================================================================
+   MOBILE & INTERFACE UTILITIES
+   ========================================================================== */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.mobile-menu-btn:hover,
+.mobile-menu-btn:active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.btn-sidebar-close {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: auto;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.btn-sidebar-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 18, 0.72);
+  backdrop-filter: blur(4px);
+  z-index: 48;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.sidebar-backdrop.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Password Input with Toggle Button */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrapper .form-control {
+  padding-right: 44px;
+}
+
+.btn-password-toggle {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  border-radius: 4px;
+}
+
+.btn-password-toggle:hover,
+.btn-password-toggle:focus {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Rear Camera Non-Mirrored View */
+#camera-video.camera-rear,
+#scanner-canvas.camera-rear,
+#enroll-webcam-video.camera-rear {
+  transform: scaleX(1) !important;
+}
+
+/* Responsive Table Container */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
 /* ==========================================================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN (TABLETS, MOBILE & ANDROID)
    ========================================================================== */
 @media (max-width: 1024px) {
   .scanner-grid {
@@ -923,19 +1037,173 @@ select.form-control option {
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
+  /* Fix touch input sizing & prevent unwanted Android auto-zoom */
+  .form-control, select.form-control {
+    font-size: 16px;
   }
+
+  /* Android / Mobile Login Overlay */
+  #login-overlay {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start;
+    padding: 24px 14px;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .login-card {
+    margin: auto;
+    padding: 24px 18px;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  /* Mobile Slide-Out Sidebar Drawer */
+  .sidebar {
+    width: 280px;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    box-shadow: none;
+    z-index: 50;
+  }
+
   .sidebar.mobile-open {
     transform: translateX(0);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.7);
   }
+
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+
+  .btn-sidebar-close {
+    display: flex;
+  }
+
   .main-wrapper {
     margin-left: 0;
   }
+
+  /* Compact Mobile Top Header */
   .top-header {
-    padding: 0 16px;
+    height: 64px;
+    padding: 0 14px;
   }
+
+  .header-title h2 {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 190px;
+  }
+
+  .header-title p {
+    display: none;
+  }
+
+  .live-badge {
+    padding: 4px 10px;
+    font-size: 11px;
+    gap: 6px;
+  }
+
   .page-container {
+    padding: 14px;
+  }
+
+  /* Dashboard Stats Grid (2-column on mobile) */
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
     padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .stat-title {
+    font-size: 12px;
+  }
+
+  /* Biometric Scanner Responsive Layout */
+  .camera-container {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    max-height: 380px;
+  }
+
+  .scanner-status-strip {
+    font-size: 11px;
+    padding: 8px 12px;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+  }
+
+  .camera-controls-bar {
+    gap: 8px;
+  }
+
+  /* Touch-Friendly Tables */
+  .table-responsive {
+    border-radius: var(--radius-sm);
+  }
+
+  .custom-table {
+    min-width: 580px;
+  }
+
+  /* Mobile Modals */
+  .modal-dialog {
+    width: 94%;
+    max-width: 480px;
+    margin: 16px auto;
+  }
+
+  .modal-body {
+    padding: 16px;
+    max-height: 72vh;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .header-title h2 {
+    max-width: 140px;
+    font-size: 14px;
+  }
+
+  .live-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .camera-controls-bar button {
+    font-size: 13px;
+    padding: 9px 10px;
   }
 }

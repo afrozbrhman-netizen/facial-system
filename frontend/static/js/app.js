@@ -5,6 +5,7 @@ const App = {
   currentTab: "dashboard",
 
   init() {
+    this.initMobileLayout();
     this.bindNavigation();
     Auth.init();
     Scanner.init();
@@ -16,6 +17,76 @@ const App = {
     if (Auth.currentUser && API.getToken()) {
       this.initTabModules();
     }
+  },
+
+  initMobileLayout() {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+    if (isAndroid) {
+      document.body.classList.add("is-android");
+    }
+    if (isMobile) {
+      document.body.classList.add("is-mobile");
+    }
+
+    // Toggle Mobile Sidebar Drawer
+    const btnMobileMenu = document.getElementById("btn-mobile-menu");
+    const btnSidebarClose = document.getElementById("btn-sidebar-close");
+    const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+    const sidebar = document.getElementById("app-sidebar") || document.querySelector(".sidebar");
+
+    const openSidebar = () => {
+      if (sidebar) sidebar.classList.add("mobile-open");
+      if (sidebarBackdrop) sidebarBackdrop.classList.add("active");
+    };
+
+    const closeSidebar = () => {
+      if (sidebar) sidebar.classList.remove("mobile-open");
+      if (sidebarBackdrop) sidebarBackdrop.classList.remove("active");
+    };
+
+    if (btnMobileMenu) {
+      btnMobileMenu.addEventListener("click", () => {
+        if (sidebar && sidebar.classList.contains("mobile-open")) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+    }
+
+    if (btnSidebarClose) {
+      btnSidebarClose.addEventListener("click", closeSidebar);
+    }
+
+    if (sidebarBackdrop) {
+      sidebarBackdrop.addEventListener("click", closeSidebar);
+    }
+
+    // Password visibility toggle
+    const btnTogglePassword = document.getElementById("btn-toggle-password");
+    const passwordInput = document.getElementById("login-password");
+    const eyeIcon = document.getElementById("pw-eye-icon");
+
+    if (btnTogglePassword && passwordInput) {
+      btnTogglePassword.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+        if (eyeIcon) {
+          eyeIcon.innerHTML = isPassword
+            ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`
+            : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+        }
+      });
+    }
+
+    // Auto-close sidebar on window resize if resized to desktop
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 768) {
+        closeSidebar();
+      }
+    });
   },
 
   bindNavigation() {
@@ -30,6 +101,14 @@ const App = {
 
   switchTab(tabName) {
     this.currentTab = tabName;
+
+    // Automatically manage mobile interface: close sidebar on tab switch
+    if (window.innerWidth <= 768) {
+      const sidebar = document.getElementById("app-sidebar") || document.querySelector(".sidebar");
+      const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+      if (sidebar) sidebar.classList.remove("mobile-open");
+      if (sidebarBackdrop) sidebarBackdrop.classList.remove("active");
+    }
 
     // Update active state in nav
     document.querySelectorAll(".nav-item").forEach(el => {

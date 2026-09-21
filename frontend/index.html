@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0b0f19">
   <title>Attendance Studio 2.0 - Enterprise Biometric System</title>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,7 +43,15 @@
         </div>
         <div class="input-group" style="margin-bottom: 24px;">
           <label for="login-password">Password</label>
-          <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required autocomplete="new-password">
+          <div class="password-input-wrapper">
+            <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required autocomplete="new-password">
+            <button type="button" class="btn-password-toggle" id="btn-toggle-password" title="Show or hide password" aria-label="Toggle password visibility">
+              <svg id="pw-eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">
           Sign In to Terminal
@@ -54,7 +66,7 @@
   <div id="app-container">
 
     <!-- SIDEBAR NAVIGATION -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="app-sidebar">
       <div class="brand-section">
         <div class="brand-logo">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 00-16 0"/></svg>
@@ -63,6 +75,7 @@
           <h1>Attendance Studio</h1>
           <span>Enterprise 2.0</span>
         </div>
+        <button class="btn-sidebar-close" id="btn-sidebar-close" aria-label="Close Navigation Menu">&times;</button>
       </div>
 
       <nav class="nav-section">
@@ -113,14 +126,33 @@
       </div>
     </aside>
 
+    <!-- MOBILE SIDEBAR BACKDROP -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
     <!-- MAIN WRAPPER -->
     <div class="main-wrapper">
       <!-- TOP HEADER -->
       <header class="top-header">
-        <div class="header-title">
-          <h2 id="header-title-text">Executive Attendance Overview</h2>
-          <p>Real-Time Deep ResNet 128-d Biometrics &amp; Anti-Spoofing</p>
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="btn-mobile-menu" aria-label="Open Navigation Menu">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="header-title">
+            <h2 id="header-title-text">Executive Attendance Overview</h2>
+            <p>Real-Time Deep ResNet 128-d Biometrics &amp; Anti-Spoofing</p>
+          </div>
         </div>
+        <div class="header-actions">
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            Biometric AI Online
+          </div>
+        </div>
+      </header>
         <div class="header-actions">
           <div class="live-badge">
             <div class="live-dot"></div>
@@ -260,11 +292,15 @@
               </div>
 
               <!-- Camera Controls -->
-              <div style="display: flex; gap: 12px; margin-top: 16px;">
-                <button class="btn btn-primary" id="btn-toggle-camera" style="flex: 1;">
+              <div class="camera-controls-bar" style="display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;">
+                <button class="btn btn-primary" id="btn-toggle-camera" style="flex: 2; min-width: 140px;">
                   Start Camera
                 </button>
-                <button class="btn btn-secondary" id="btn-manual-scan">
+                <button class="btn btn-secondary" id="btn-flip-camera" title="Flip Camera (Front / Rear)" style="flex: 1; min-width: 110px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-3a2 2 0 0 1-2-2V2"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 11 15 7 19"/><line x1="11" y1="15" x2="2" y2="15"/></svg>
+                  <span id="flip-camera-label">Flip Camera</span>
+                </button>
+                <button class="btn btn-secondary" id="btn-manual-scan" style="flex: 1; min-width: 110px;">
                   Scan Frame
                 </button>
               </div>
@@ -658,7 +694,7 @@
         <button class="modal-close" onclick="Employees.closeFaceModal()">&times;</button>
       </div>
       <div class="modal-body" style="text-align: center;">
-        <div style="position: relative; width: 320px; height: 320px; margin: 0 auto 16px; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid var(--border);">
+        <div class="enroll-video-container" style="position: relative; width: 100%; max-width: 280px; aspect-ratio: 1/1; margin: 0 auto 16px; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid var(--border);">
           <video id="enroll-webcam-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
         </div>
 
@@ -666,10 +702,14 @@
           Position face straight towards camera and click Capture.
         </div>
 
-        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 16px;">
+        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap;">
           <button type="button" class="btn btn-primary" id="btn-capture-enroll-face">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
             Capture &amp; Enroll Face
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-flip-enroll-camera" title="Flip Camera (Front/Rear)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-3a2 2 0 0 1-2-2V2"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 11 15 7 19"/><line x1="11" y1="15" x2="2" y2="15"/></svg>
+            Flip
           </button>
         </div>
 

@@ -4,6 +4,7 @@
 const Employees = {
   currentEnrollEmployeeId: null,
   enrollStream: null,
+  enrollFacingMode: "user",
 
   async init() {
     this.bindEvents();
@@ -40,6 +41,12 @@ const Employees = {
     const btnCaptureFace = document.getElementById("btn-capture-enroll-face");
     if (btnCaptureFace) {
       btnCaptureFace.addEventListener("click", () => this.captureAndEnrollFace());
+    }
+
+    // Face enrollment flip camera trigger
+    const btnFlipFace = document.getElementById("btn-flip-enroll-camera");
+    if (btnFlipFace) {
+      btnFlipFace.addEventListener("click", () => this.flipEnrollCamera());
     }
 
     // File upload fallback for face enrollment
@@ -262,12 +269,26 @@ const Employees = {
     if (modal) modal.classList.remove("active");
   },
 
+  async flipEnrollCamera() {
+    this.enrollFacingMode = this.enrollFacingMode === "user" ? "environment" : "user";
+    API.showToast(`Enrollment camera switched to ${this.enrollFacingMode === "environment" ? "Rear (Back)" : "Front (Selfie)"}`, "info");
+    this.stopEnrollWebcam();
+    await this.startEnrollWebcam();
+  },
+
   async startEnrollWebcam() {
     const video = document.getElementById("enroll-webcam-video");
     const statusEl = document.getElementById("enroll-status-msg");
+
+    if (this.enrollFacingMode === "environment") {
+      if (video) video.classList.add("camera-rear");
+    } else {
+      if (video) video.classList.remove("camera-rear");
+    }
+
     try {
       this.enrollStream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 480, height: 480, facingMode: "user" }
+        video: { width: 480, height: 480, facingMode: this.enrollFacingMode }
       });
       video.srcObject = this.enrollStream;
       await video.play();

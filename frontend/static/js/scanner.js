@@ -6,6 +6,7 @@ const Scanner = {
   isScanning: false,
   scanInterval: null,
   scanCooldown: false,
+  currentFacingMode: "user", // "user" (front) or "environment" (rear)
 
   init() {
     this.bindEvents();
@@ -23,6 +24,13 @@ const Scanner = {
       });
     }
 
+    const btnFlip = document.getElementById("btn-flip-camera");
+    if (btnFlip) {
+      btnFlip.addEventListener("click", () => {
+        this.flipCamera();
+      });
+    }
+
     const btnSnap = document.getElementById("btn-manual-scan");
     if (btnSnap) {
       btnSnap.addEventListener("click", () => {
@@ -31,14 +39,40 @@ const Scanner = {
     }
   },
 
+  async flipCamera() {
+    this.currentFacingMode = this.currentFacingMode === "user" ? "environment" : "user";
+    const label = document.getElementById("flip-camera-label");
+    if (label) {
+      label.textContent = this.currentFacingMode === "environment" ? "Rear Cam" : "Front Cam";
+    }
+
+    API.showToast(`Switched to ${this.currentFacingMode === "environment" ? "Rear (Back)" : "Front (Selfie)"} Camera`, "info");
+
+    if (this.isScanning) {
+      // Restart camera with new facing mode
+      this.stopCamera();
+      await this.startCamera();
+    }
+  },
+
   async startCamera() {
     const video = document.getElementById("camera-video");
+    const canvas = document.getElementById("scanner-canvas");
     const btnToggle = document.getElementById("btn-toggle-camera");
     const statusText = document.getElementById("scanner-status-text");
 
+    // Manage mirroring: rear camera should not be mirrored
+    if (this.currentFacingMode === "environment") {
+      if (video) video.classList.add("camera-rear");
+      if (canvas) canvas.classList.add("camera-rear");
+    } else {
+      if (video) video.classList.remove("camera-rear");
+      if (canvas) canvas.classList.remove("camera-rear");
+    }
+
     try {
       this.videoStream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: this.currentFacingMode },
         audio: false
       });
       video.srcObject = this.videoStream;
