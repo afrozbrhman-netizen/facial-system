@@ -56,25 +56,6 @@ const Auth = {
       });
     }
 
-    // Quick demo role buttons
-    document.querySelectorAll(".role-chip").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const role = btn.dataset.role;
-        const uInput = document.getElementById("login-username");
-        const pInput = document.getElementById("login-password");
-        if (role === "admin") {
-          uInput.value = "admin";
-          pInput.value = "Admin@123";
-        } else if (role === "teacher") {
-          uInput.value = "teacher";
-          pInput.value = "Teacher@123";
-        } else if (role === "student") {
-          uInput.value = "8";
-          pInput.value = "8@123";
-        }
-      });
-    });
-
     // Logout button
     const logoutBtn = document.getElementById("btn-logout");
     if (logoutBtn) {
