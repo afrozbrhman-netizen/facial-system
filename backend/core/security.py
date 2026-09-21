@@ -92,4 +92,4 @@ def admin_required(f):
     return roles_required("admin")(f)
 
 def teacher_or_admin_required(f):
-    return roles_required("admin", "teacher_hr")(f)
+    return roles_required("admin", "teacher_hr", "teacher", "faculty", "hr", "staff")(f)

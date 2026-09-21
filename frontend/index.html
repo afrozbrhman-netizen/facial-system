@@ -80,23 +80,23 @@
 
       <nav class="nav-section">
         <div class="nav-label">Main Menu</div>
-        <a class="nav-item active" data-tab="dashboard" data-permission="admin,teacher_hr">
+        <a class="nav-item active" data-tab="dashboard" data-permission="admin,teacher_hr,faculty,teacher,hr">
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           Dashboard
         </a>
-        <a class="nav-item" data-tab="scanner" data-permission="admin,teacher_hr">
+        <a class="nav-item" data-tab="scanner" data-permission="admin,teacher_hr,faculty,teacher,hr">
           <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           Camera Terminal
         </a>
-        <a class="nav-item" data-tab="employees" data-permission="admin,teacher_hr">
+        <a class="nav-item" data-tab="employees" data-permission="admin,teacher_hr,faculty,teacher,hr">
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
           Staff & Students
         </a>
-        <a class="nav-item" data-tab="records" data-permission="admin,teacher_hr,student_employee">
+        <a class="nav-item" data-tab="records" data-permission="admin,teacher_hr,student_employee,faculty,teacher,hr">
           <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           Attendance Logs
         </a>
-        <a class="nav-item" data-tab="reports" data-permission="admin,teacher_hr">
+        <a class="nav-item" data-tab="reports" data-permission="admin,teacher_hr,faculty,teacher,hr">
           <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Reports & Exports
         </a>
@@ -645,14 +645,23 @@
               <select id="add-emp-dept" class="form-control"></select>
             </div>
             <div class="input-group">
-              <label>Designation / Role</label>
-              <input type="text" id="add-emp-designation" class="form-control" value="Student">
+              <label>Designation</label>
+              <input type="text" id="add-emp-designation" class="form-control" value="Student" placeholder="e.g. Student, Faculty, HR, Teacher">
             </div>
           </div>
-          <div class="input-group" style="margin-top: 10px;">
-            <label>Individual Student Password (Optional)</label>
-            <input type="password" id="add-emp-password" class="form-control" placeholder="Leave blank to auto-generate: [Code]@123">
-            <span style="font-size: 11.5px; color: var(--text-dim); margin-top: 4px;">Each student/employee receives their own unique password.</span>
+          <div class="grid-2" style="margin-bottom: 0; gap: 12px; margin-top: 10px;">
+            <div class="input-group">
+              <label>Access Role / Permissions</label>
+              <select id="add-emp-role" class="form-control">
+                <option value="student_employee">Student / Employee (Logs only)</option>
+                <option value="teacher_hr">Faculty / HR / Teacher (Full Terminal & Main Menu)</option>
+                <option value="admin">Administrator (Full Access)</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Login Password (Optional)</label>
+              <input type="password" id="add-emp-password" class="form-control" placeholder="Leave blank for: [Code]@123">
+            </div>
           </div>
         </div>
         <div class="modal-footer">

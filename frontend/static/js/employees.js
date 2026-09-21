@@ -173,6 +173,7 @@ const Employees = {
     const phone = document.getElementById("add-emp-phone").value.trim();
     const deptId = document.getElementById("add-emp-dept").value;
     const designation = document.getElementById("add-emp-designation").value.trim();
+    const role = document.getElementById("add-emp-role")?.value || "student_employee";
     const password = document.getElementById("add-emp-password")?.value.trim();
 
     try {
@@ -185,6 +186,7 @@ const Employees = {
           phone: phone,
           department_id: deptId ? parseInt(deptId) : null,
           designation_class: designation || "Student",
+          role: role,
           password: password || undefined
         })
       });

@@ -106,26 +106,39 @@ class EmployeeService:
                 except Exception as sync_err:
                     print(f"[SyncWarning] Legacy students sync: {sync_err}")
 
-                # Create dedicated login account with individual password for this student
+                # Create dedicated login account with individual password for this employee/student
                 from backend.core.security import hash_password
                 student_pwd = str(data.get("password", "")).strip() or f"{code}@123"
                 pwd_hash = hash_password(student_pwd)
+
+                # Assign appropriate role: check explicit role input or designation keywords
+                explicit_role = str(data.get("role", "")).strip().lower()
+                desig_lower = designation.lower()
+                if explicit_role in ("teacher_hr", "admin", "student_employee"):
+                    user_role = explicit_role
+                elif any(k in desig_lower for k in ["teacher", "faculty", "hr", "prof", "lecturer", "staff", "instructor", "admin"]):
+                    user_role = "admin" if "admin" in desig_lower else "teacher_hr"
+                else:
+                    user_role = "student_employee"
+
                 cur.execute("""
                     INSERT INTO users (username, email, password_hash, role, employee_id, status, created_at)
-                    VALUES (?, ?, ?, 'student_employee', ?, 'active', ?)
+                    VALUES (?, ?, ?, ?, ?, 'active', ?)
                     ON CONFLICT(username) DO UPDATE SET 
                         password_hash = excluded.password_hash,
+                        role = excluded.role,
                         employee_id = excluded.employee_id,
                         email = COALESCE(excluded.email, users.email)
-                """, (code, email, pwd_hash, emp_id, now_str))
+                """, (code, email, pwd_hash, user_role, emp_id, now_str))
 
                 conn.commit()
 
-            audit_service.log_action("EMPLOYEE_CREATED", username=actor, entity_type="employee", entity_id=str(emp_id), details=f"Registered {name} ({code}) with dedicated account")
+            audit_service.log_action("EMPLOYEE_CREATED", username=actor, entity_type="employee", entity_id=str(emp_id), details=f"Registered {name} ({code}) with role {user_role}")
             return {
                 "success": True,
-                "message": f"Successfully enrolled {name}. Student Login Password: {student_pwd}",
+                "message": f"Successfully enrolled {name} ({user_role}). Login Password: {student_pwd}",
                 "employee_id": emp_id,
+                "role": user_role,
                 "default_password": student_pwd
             }
         except Exception as e:

@@ -78,23 +78,38 @@ const Auth = {
     const avatarEl = document.getElementById("sidebar-user-avatar");
 
     if (nameEl) nameEl.textContent = user.full_name || user.username;
+
+    // Normalize role: handle teacher, faculty, hr, teacher_hr, staff
+    const rawRole = (user.role || "").toLowerCase().trim();
+    let normalizedRole = rawRole;
+    if (["teacher", "faculty", "hr", "teacher_hr", "staff", "instructor", "professor"].includes(rawRole)) {
+      normalizedRole = "teacher_hr";
+    } else if (["student", "employee", "student_employee"].includes(rawRole)) {
+      normalizedRole = "student_employee";
+    } else if (rawRole === "admin" || rawRole === "administrator") {
+      normalizedRole = "admin";
+    }
+
     if (roleEl) {
       const roleTitles = {
         admin: "Administrator",
         teacher_hr: "Faculty / HR",
         student_employee: "Student / Employee"
       };
-      roleEl.textContent = roleTitles[user.role] || user.role;
+      roleEl.textContent = roleTitles[normalizedRole] || user.role;
     }
     if (avatarEl && user.profile_photo_path) {
       avatarEl.innerHTML = `<img src="/${user.profile_photo_path}" alt="${user.full_name}">`;
     }
 
     // Apply role permissions to nav elements
-    const role = user.role;
     document.querySelectorAll("[data-permission]").forEach(el => {
-      const permitted = el.dataset.permission.split(",");
-      if (permitted.includes(role)) {
+      const permitted = el.dataset.permission.split(",").map(p => p.trim().toLowerCase());
+      if (
+        permitted.includes(normalizedRole) || 
+        permitted.includes(rawRole) ||
+        (normalizedRole === "teacher_hr" && (permitted.includes("teacher_hr") || permitted.includes("faculty") || permitted.includes("hr") || permitted.includes("teacher")))
+      ) {
         el.style.display = "";
       } else {
         el.style.display = "none";
@@ -102,7 +117,7 @@ const Auth = {
     });
 
     // Default tab depending on role
-    if (role === "student_employee") {
+    if (normalizedRole === "student_employee") {
       App.switchTab("records");
     } else {
       App.switchTab("dashboard");
