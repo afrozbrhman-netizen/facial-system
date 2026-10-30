@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # Prevents Python from writing pyc files and buffering stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PORT=5000
+ENV PORT=10000
 ENV CMAKE_BUILD_PARALLEL_LEVEL=1
 
 # Install system libraries needed by OpenCV, Dlib, and CMake
@@ -38,10 +38,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all application files
 COPY . .
 
-# Expose ports (Render defaults to 10000 for web services, or 5000)
+# Expose standard Render port
 EXPOSE 10000
-EXPOSE 5000
 
-# Run with Gunicorn production server bound to both ports and dynamic $PORT
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:10000 --bind 0.0.0.0:5000 --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 4 --timeout 120 run_server:app"]
+# Run with Gunicorn production server bound to dynamic $PORT (defaults to 10000 on Render)
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 4 --timeout 120 run_server:app"]
 
