@@ -7,10 +7,11 @@ ENV PYTHONUNBUFFERED=1
 ENV PORT=10000
 ENV CMAKE_BUILD_PARALLEL_LEVEL=1
 
-# Install system libraries needed by OpenCV, Dlib, and CMake
+# Install system libraries needed by OpenCV, Dlib, Git, and CMake
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
+    git \
     libopenblas-dev \
     liblapack-dev \
     libgl1 \
@@ -26,8 +27,9 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 # Install precompiled binary dlib to avoid 12+ min C++ compilation and out-of-memory errors
 RUN pip install --no-cache-dir dlib-bin
 
-# Install face-recognition without pulling source dlib
-RUN pip install --no-cache-dir --no-deps face-recognition face-recognition-models
+# Install official face_recognition_models and face-recognition
+RUN pip install --no-cache-dir git+https://github.com/ageitgey/face_recognition_models.git
+RUN pip install --no-cache-dir --no-deps face-recognition
 
 # Copy dependency requirements first to leverage Docker caching
 COPY requirements.txt .
