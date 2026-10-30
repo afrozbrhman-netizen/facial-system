@@ -38,9 +38,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all application files
 COPY . .
 
-# Expose port (Render sets $PORT dynamically)
+# Expose ports (Render defaults to 10000 for web services, or 5000)
+EXPOSE 10000
 EXPOSE 5000
 
-# Run with Gunicorn production server
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 1 --threads 4 --timeout 120 run_server:app"]
+# Run with Gunicorn production server bound to both ports and dynamic $PORT
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:10000 --bind 0.0.0.0:5000 --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 4 --timeout 120 run_server:app"]
 
