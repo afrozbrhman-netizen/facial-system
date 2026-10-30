@@ -1,8 +1,9 @@
 services:
   - type: web
     name: attendance-management-studio
-    env: docker
+    runtime: docker
     plan: free
+    dockerContext: .
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     envVars:
