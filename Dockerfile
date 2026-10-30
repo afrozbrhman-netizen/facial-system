@@ -21,14 +21,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Upgrade packaging tools
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+# Upgrade packaging tools (pin setuptools<70.0.0 to retain pkg_resources needed by face_recognition)
+RUN pip install --no-cache-dir --upgrade pip wheel && \
+    pip install --no-cache-dir "setuptools<70.0.0"
 
 # Install precompiled binary dlib to avoid 12+ min C++ compilation and out-of-memory errors
 RUN pip install --no-cache-dir dlib-bin
 
 # Install official face_recognition_models and face-recognition
-RUN pip install --no-cache-dir git+https://github.com/ageitgey/face_recognition_models.git
+RUN pip install --no-cache-dir face-recognition-models
 RUN pip install --no-cache-dir --no-deps face-recognition
 
 # Copy dependency requirements first to leverage Docker caching
